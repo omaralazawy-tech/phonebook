@@ -82,7 +82,7 @@ $('ci').querySelector('p').classList.toggle('hide',!canE());}
 
 sb.auth.onAuthStateChange((_,s)=>boot(s));
 async function login(){const{error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
-if(error)$('le').textContent='البريد أو كلمة المرور غير صحيحة';}
+if(error)$('le').textContent=error.message;}
 async function boot(s){
  if(!s){me=null;$('login').classList.remove('hide');$('app').classList.add('hide');$('who').textContent='';return;}
  const{data}=await sb.from('profiles').select('*').eq('id',s.user.id).single();
