@@ -79,7 +79,7 @@ function perms(){document.querySelectorAll('.ed').forEach(e=>e.classList.toggle(
 document.querySelectorAll('.ad').forEach(e=>e.classList.toggle('hide',!isA()));
 $('ci').querySelector('p').classList.toggle('hide',!canE());}
 
-sb.auth.onAuthStateChange((_,s)=>boot(s));
+sb.auth.onAuthStateChange((_,s)=>setTimeout(()=>boot(s),0));
 async function login(){const{error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
 if(error)$('le').textContent=error.message;}
 async function boot(s){
