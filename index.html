@@ -65,8 +65,7 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-const SB_URL="https://jorhtgaphndxyepkpmbr.supabase.co/rest/v1/", SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvcmh0Z2FwaG5keHllcGtwbWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MzY1NDksImV4cCI6MjEwODQxMjU0OX0.6OEPy2JmkVY3zZZZtkfoN2l9kFtG20IzVb0Ypa3POKg";
-const sb=supabase.createClient(SB_URL,SB_KEY);
+const SB_URL="https://jorhtgaphndxyepkpmbr.supabase.co", SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvcmh0Z2FwaG5keHllcGtwbWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MzY1NDksImV4cCI6MjEwODQxMjU0OX0.6OEPy2JmkVY3zZZZtkfoN2l9kFtG20IzVb0Ypa3POKg";
 const $=s=>document.getElementById(s);
 let me=null,C=[],R=[],rows=[],file="";
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
