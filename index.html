@@ -5,16 +5,15 @@
 :root{--bg:#f3f1ec;--c:#fff;--t:#1d2a33;--p:#0f5c55;--pt:#fff;--w:#ffe8a3;--b:#cfd6da;--r:#b3261e}
 @media(prefers-color-scheme:dark){:root{--bg:#13191c;--c:#1d2529;--t:#e9eef0;--p:#3cc2b4;--pt:#06201d;--w:#6b5510;--b:#3a464b;--r:#ff8a80}}
 *{box-sizing:border-box}body{margin:0;font:18px/1.6 Tahoma,Arial,sans-serif;background:var(--bg);color:var(--t)}
-header{background:var(--p);color:var(--pt);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header{background:var(--p);color:var(--pt);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 h1{margin:0;font-size:28px}main{max-width:980px;margin:auto;padding:14px}
 .card{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px;margin:10px 0}
 button,input,select{font:inherit;color:var(--t)}
-button{background:var(--p);color:var(--pt);border:0;border-radius:8px;padding:10px 14px;cursor:pointer;margin:3px}
+button{background:var(--p);color:var(--pt);border:0;border-radius:8px;padding:10px 14px;cursor:pointer;margin:3px;touch-action:manipulation}
 button.s{background:transparent;color:var(--t);border:1px solid var(--b)}button.d{background:var(--r);color:#fff}
 input,select{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:9px;width:100%}
-#q{font-size:24px;padding:16px;border:2px solid var(--p)}
-.bar{display:flex;flex-wrap:wrap}.stat{font-size:20px}
-.rec b{font-size:20px}.ph{direction:ltr;display:inline-block;font-size:22px;font-weight:bold;color:var(--p)}
+input[type=checkbox]{width:auto}#q{font-size:24px;padding:16px;border:2px solid var(--p)}
+.bar{display:flex;flex-wrap:wrap}.ph{direction:ltr;display:inline-block;font-size:22px;font-weight:bold;color:var(--p)}
 table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid var(--b);padding:3px}td input{padding:5px}
 .tw{overflow-x:auto}.doubt input{background:var(--w)}.dup{outline:3px solid var(--r)}
 .hide{display:none}.err{color:var(--r)}:focus-visible{outline:3px solid var(--p);outline-offset:2px}
@@ -23,18 +22,23 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid 
 <main>
 <section id="login" class="card hide"><h2>تسجيل الدخول</h2>
 <input id="em" type="email" placeholder="البريد الإلكتروني" dir="ltr"><br><br>
-<input id="pw" type="password" placeholder="كلمة المرور" dir="ltr"><br><br>
+<input id="pw" type="password" placeholder="كلمة المرور" dir="ltr" onkeydown="if(event.key=='Enter')login()"><br><br>
 <button onclick="login()">دخول</button><p id="le" class="err"></p></section>
 
 <div id="app" class="hide">
 <div class="bar"><button onclick="V('home')">الرئيسية</button><button class="ed" onclick="V('up')">رفع صورة جديدة</button>
 <button class="ed" onclick="edit()">إضافة سجل يدوياً</button><button onclick="all()">عرض جميع الأسماء</button>
-<button class="ed" onclick="V('ce');drawC()">إدارة المراكز والأقسام</button><button onclick="expCSV()">تصدير CSV</button>
-<button class="ad" onclick="bak()">نسخة احتياطية</button><button class="ad" onclick="V('us');drawU()">المستخدمون</button>
-<button class="s" onclick="sb.auth.signOut()">خروج</button></div>
+<button class="ed" onclick="V('ce');drawC()">المراكز والأقسام</button><button class="ed" onclick="V('dp');findDup()">فحص المكررات</button>
+<button onclick="expCSV()">تصدير CSV</button><button class="ad" onclick="bak()">نسخة احتياطية</button>
+<button class="ad" onclick="V('us');drawU()">المستخدمون</button><button class="s" onclick="sb.auth.signOut()">خروج</button></div>
 
-<section id="home"><input id="q" placeholder="ابحث بالاسم أو الرتبة أو المنصب أو المركز أو الرقم…" oninput="draw()">
-<p class="stat" id="st"></p><div id="list"></div></section>
+<section id="home"><input id="q" placeholder="ابحث بالاسم أو الرتبة أو المنصب أو المركز أو الرقم…" oninput="dq()">
+<p id="st"></p><div id="list"></div>
+<details class="card ad"><summary>➕ إضافة مستخدم جديد</summary><br>
+<input id="ne" type="email" dir="ltr" placeholder="البريد الإلكتروني"><br><br>
+<input id="np" type="text" dir="ltr" placeholder="كلمة المرور (6 أحرف على الأقل)"><br><br>
+<select id="nr"><option value="viewer">قارئ (بحث فقط)</option><option value="editor">مدخل (إضافة وتعديل)</option><option value="admin">مدير</option></select><br>
+<button onclick="newU()">إنشاء المستخدم</button></details></section>
 
 <section id="up" class="hide card"><h2>رفع صورة أو PDF</h2>
 <input type="file" id="fl" accept="image/jpeg,image/png,application/pdf" onchange="pick()">
@@ -43,18 +47,21 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid 
 <p><button onclick="ocr()">استخراج النص</button> <span id="pg"></span></p></section>
 
 <section id="rv" class="hide card"><h2>جدول المراجعة</h2>
-<p>الحقول الصفراء مشكوك فيها وحقل بحدود حمراء يعني احتمال تكرار. صحّح ثم أكّد.</p>
+<p>الأصفر: مشكوك فيه. الإطار الأحمر: مكرر لسجل موجود. صحّح ثم أكّد.</p>
 <div class="tw"><table id="rt"></table></div>
-<button onclick="save()">تأكيد وحفظ</button><button class="s" onclick="V('home')">إلغاء</button></section>
+<button onclick="save()">تأكيد وحفظ</button><button class="s" onclick="dropDup()">إزالة المكرر من القائمة</button><button class="s" onclick="V('home')">إلغاء</button></section>
 
 <section id="ce" class="hide card"><h2>المراكز والأقسام</h2>
 <input id="cn" placeholder="اسم مركز أو قسم جديد"><br><select id="cp"></select><br>
 <button onclick="addC()">إضافة</button><div id="cls"></div></section>
 
-<section id="us" class="hide card"><h2>المستخدمون والصلاحيات</h2><div id="ul"></div>
-<p>لإضافة مستخدم جديد: Supabase ← Authentication ← Users ← Add user.</p></section>
+<section id="us" class="hide card"><h2>المستخدمون والصلاحيات</h2><div id="ul"></div></section>
 
-<section id="ci" class="hide card"><p>استيراد CSV: <input type="file" id="csvf" accept=".csv" onchange="impCSV()"></p>
+<section id="dp" class="hide card"><h2>السجلات المكررة</h2>
+<p>تُعدّ مكررة: الأرقام المتطابقة، أو الاسم المتطابق في نفس المركز. المحدّد سيُحذف، والأقدم يبقى افتراضياً. يُفضّل أخذ نسخة احتياطية أولاً.</p>
+<div id="dl"></div><button class="d" onclick="delDup()">حذف المحدد</button></section>
+
+<section id="ci" class="hide card"><p>استيراد CSV أو Excel: <input type="file" id="csvf" accept=".csv,.xlsx" onchange="impCSV()"></p>
 <p class="ad">استعادة نسخة احتياطية: <input type="file" id="bkf" accept=".json" onchange="rest()"></p></section>
 </div>
 
@@ -64,62 +71,77 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const SB_URL="https://jorhtgaphndxyepkpmbr.supabase.co", SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvcmh0Z2FwaG5keHllcGtwbWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MzY1NDksImV4cCI6MjEwODQxMjU0OX0.6OEPy2JmkVY3zZZZtkfoN2l9kFtG20IzVb0Ypa3POKg";
- const sb = supabase.createClient(SB_URL, SB_KEY);
+const SB_URL="https://jorhtgaphndxyepkpmbr.supabase.co",
+SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvcmh0Z2FwaG5keHllcGtwbWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MzY1NDksImV4cCI6MjEwODQxMjU0OX0.6OEPy2JmkVY3zZZZtkfoN2l9kFtG20IzVb0Ypa3POKg";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+window.addEventListener('unhandledrejection',e=>console.error(e.reason));
 const $=s=>document.getElementById(s);
-let me=null,C=[],R=[],rows=[],file="";
+let me=null,C=[],R=[],CM={},rows=[],file="",booted=null,LIM=50,T;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nd=s=>(s||'').replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-1776);
 const nz=s=>nd(s).replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/\s+/g,' ').trim().toLowerCase();
 const dig=s=>nd(s).replace(/\D/g,'');
-const cname=id=>(C.find(c=>c.id==id)||{}).name||'';
-const canE=()=>me&&['admin','editor'].includes(me.role), isA=()=>me&&me.role=='admin';
-function V(id){['home','up','rv','ce','us','ci'].forEach(x=>$(x).classList.toggle('hide',x!=id&&!(x=='ci'&&id=='home')));}
+const cname=id=>CM[id]||'';
+const canE=()=>me&&['admin','editor'].includes(me.role),isA=()=>me&&me.role=='admin';
+function V(id){['home','up','rv','ce','us','dp','ci'].forEach(x=>$(x).classList.toggle('hide',x!=id&&!(x=='ci'&&id=='home')));}
 function perms(){document.querySelectorAll('.ed').forEach(e=>e.classList.toggle('hide',!canE()));
 document.querySelectorAll('.ad').forEach(e=>e.classList.toggle('hide',!isA()));
 $('ci').querySelector('p').classList.toggle('hide',!canE());}
 
-sb.auth.onAuthStateChange((_,s)=>setTimeout(()=>boot(s),0));
-async function login(){const{error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
-if(error)$('le').textContent=error.message;}
+sb.auth.onAuthStateChange((ev,s)=>setTimeout(()=>{
+ if(ev=='TOKEN_REFRESHED'||ev=='USER_UPDATED')return;
+ const id=s?s.user.id:null;if(id&&id===booted)return;booted=id;boot(s);},0));
+async function login(){$('le').textContent='';const{error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
+if(error)$('le').textContent=error.message=='Invalid login credentials'?'البريد أو كلمة المرور غير صحيحة':error.message;}
 async function boot(s){
  if(!s){me=null;$('login').classList.remove('hide');$('app').classList.add('hide');$('who').textContent='';return;}
- const{data,error}=await sb.from('profiles').select('*').eq('id',s.user.id).maybeSingle();
- me=data;
+ const{data,error}=await sb.from('profiles').select('*').eq('id',s.user.id).maybeSingle();me=data;
  if(!me){$('login').classList.remove('hide');$('le').textContent=error?('خطأ: '+error.message):'لا يوجد سجل صلاحيات لهذا الحساب';return;}
- $('login').classList.add('hide');
- $('app').classList.remove('hide');$('who').textContent=s.user.email+' ('+{admin:'مدير',editor:'مدخل',viewer:'قارئ'}[me.role]+')';
- perms();await load();V('home');}
-async function load(){
- const c=await sb.from('centers').select('*').order('name');C=c.data||[];
+ $('login').classList.add('hide');$('app').classList.remove('hide');
+ $('who').textContent=s.user.email+' ('+{admin:'مدير',editor:'مدخل',viewer:'قارئ'}[me.role]+')';
+ perms();V('home');await load();}
+async function load(){$('st').textContent='جاري التحميل…';
+ const c=await sb.from('centers').select('*').order('name');C=c.data||[];CM={};C.forEach(x=>CM[x.id]=x.name);
  R=[];for(let i=0;;i+=1000){const{data}=await sb.from('records').select('*').order('id',{ascending:false}).range(i,i+999);
  R=R.concat(data||[]);if(!data||data.length<1000)break;}
+ R.forEach(x=>{const cn=CM[x.center_id]||'';x._d=dig(x.phone);x._n=nz(x.name);x._c=nz(cn);x._s=nz([x.name,x.rank,x.position,cn].join(' '));});
  $('cl').innerHTML=C.map(x=>`<option value="${esc(x.name)}">`).join('');draw();}
-function draw(){
- const q=nz($('q').value),qd=dig($('q').value);
- let r=R;if(q)r=R.filter(x=>nz([x.name,x.rank,x.position,cname(x.center_id)].join(' ')).includes(q)||(qd.length>2&&dig(x.phone).includes(qd)));
- $('st').textContent=`عدد السجلات المحفوظة: ${R.length}`+(q?` | النتائج: ${r.length}`:' | أحدث المضافة:');
+function dq(){clearTimeout(T);T=setTimeout(()=>{LIM=50;draw()},150);}
+function card(x){return `<div class="card"><b>${esc(x.rank)} ${esc(x.name)}</b><br>${esc(x.position)} — ${esc(cname(x.center_id))}<br>
+<span class="ph">${esc(x.phone)}</span><br><button onclick="cp('${esc(x.phone)}')">نسخ الرقم</button>
+${x.phone?`<a href="tel:${esc(x._d)}"><button>اتصال مباشر</button></a>`:''}${canE()?`<button class="s" onclick="edit(${x.id})">تعديل</button>`:''}</div>`;}
+function draw(){const q=nz($('q').value),qd=dig($('q').value);let r=R;
+ if(q)r=R.filter(x=>x._s.includes(q)||(qd.length>2&&x._d.includes(qd)));
+ $('st').textContent=`عدد السجلات المحفوظة: ${R.length}`+(q?` | النتائج: ${r.length}`:(window._all?'':' | أحدث المضافة:'));
  if(!q&&!window._all)r=R.slice(0,10);
- $('list').innerHTML=r.length?r.slice(0,200).map(x=>`<div class="card rec"><b>${esc(x.rank)} ${esc(x.name)}</b><br>${esc(x.position)} — ${esc(cname(x.center_id))}<br>
- <span class="ph">${esc(x.phone)}</span><br><button onclick="cp('${esc(x.phone)}')">نسخ الرقم</button>
- ${x.phone?`<a href="tel:${esc(dig(x.phone))}"><button>اتصال مباشر</button></a>`:''}
- ${canE()?`<button class="s" onclick="edit(${x.id})">تعديل</button>`:''}</div>`).join(''):'<p>لا توجد نتائج مطابقة</p>';}
-function all(){window._all=true;$('q').value='';V('home');draw();}
+ $('list').innerHTML=(r.length?r.slice(0,LIM).map(card).join(''):'<p>لا توجد نتائج مطابقة</p>')+(r.length>LIM?`<button onclick="LIM+=50;draw()">عرض المزيد (${r.length-LIM})</button>`:'');}
+function all(){window._all=true;LIM=50;$('q').value='';V('home');draw();}
 function cp(t){navigator.clipboard.writeText(t).then(()=>alert('تم نسخ الرقم'));}
 
 function edit(id){const x=R.find(r=>r.id==id)||{};const m=$('md');m.classList.remove('hide');
  const f=(k,l)=>`<p>${l}<input id="f_${k}" value="${esc(k=='c'?cname(x.center_id):x[k])}" ${k=='c'?'list="cl"':''}></p>`;
  m.innerHTML=`<h2>${id?'تعديل':'إضافة'} سجل</h2>${f('c','المركز/القسم')}${f('rank','الرتبة')}${f('name','الاسم الكامل')}${f('position','المنصب')}${f('phone','رقم الهاتف')}${f('seq','التسلسل')}
- <button onclick="sv(${id||0})">حفظ</button>${id?`<button class="d" onclick="del(${id})">حذف</button>`:''}<button class="s" onclick="$('md').classList.add('hide')">إغلاق</button>`;}
+<button onclick="sv(${id||0})">حفظ</button>${id?`<button class="d" onclick="del(${id})">حذف</button>`:''}<button class="s" onclick="$('md').classList.add('hide')">إغلاق</button>`;}
 async function cid(n){n=n.trim();if(!n)return null;let c=C.find(x=>nz(x.name)==nz(n));
- if(!c){const{data,error}=await sb.from('centers').insert({name:n}).select().single();if(error){alert(error.message);return null;}c=data;C.push(c);}return c.id;}
+ if(!c){const{data,error}=await sb.from('centers').insert({name:n}).select().single();if(error){alert(error.message);return null;}c=data;C.push(c);CM[c.id]=c.name;}return c.id;}
 async function sv(id){const g=k=>$('f_'+k).value.trim();if(!g('name'))return alert('الاسم مطلوب');
  const o={center_id:await cid(g('c')),rank:g('rank'),name:g('name'),position:g('position'),phone:nd(g('phone')),seq:g('seq')};
  const{error}=id?await sb.from('records').update(o).eq('id',id):await sb.from('records').insert(o);
  if(error)return alert(error.message);$('md').classList.add('hide');await load();}
 async function del(id){if(!confirm('هل تريد حذف هذا السجل نهائياً؟'))return;
  const{error}=await sb.from('records').delete().eq('id',id);if(error)return alert(error.message);$('md').classList.add('hide');await load();}
+
+function findDup(){const g={};
+ R.forEach(x=>{const k=[];if(x._d.length>6)k.push('p'+x._d);if(x._n)k.push('n'+x._n+'|'+(x.center_id||''));k.forEach(a=>(g[a]=g[a]||[]).push(x));});
+ const G=Object.entries(g).filter(e=>e[1].length>1);
+ $('dl').innerHTML=G.length?G.map(([k,a])=>{a=a.slice().sort((p,q)=>p.id-q.id);
+ return `<div class="card"><b>${k[0]=='p'?'رقم مكرر: '+esc(a[0].phone):'اسم مكرر: '+esc(a[0].name)}</b>`+a.map((x,j)=>`<p><label><input type="checkbox" class="dk" value="${x.id}" ${j?'checked':''}> ${esc(x.rank)} ${esc(x.name)} — ${esc(cname(x.center_id))} — <span class="ph">${esc(x.phone)}</span>${j?'':' (الأقدم)'}</label></p>`).join('')+'</div>';}).join(''):'<p>لا توجد سجلات مكررة 👍</p>';}
+async function delDup(){const ids=[...new Set([...document.querySelectorAll('.dk:checked')].map(c=>+c.value))];
+ if(!ids.length)return alert('لم تحدد شيئاً');if(!confirm('سيتم حذف '+ids.length+' سجل نهائياً. متابعة؟'))return;
+ for(let i=0;i<ids.length;i+=200){const{error}=await sb.from('records').delete().in('id',ids.slice(i,i+200));if(error)return alert(error.message);}
+ await load();findDup();alert('تم الحذف');}
 
 function drawC(){$('cp').innerHTML='<option value="">بدون تصنيف رئيسي</option>'+C.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
  $('cls').innerHTML=C.map(c=>`<p>${esc(c.name)} ${c.parent_id?'(تابع لـ '+esc(cname(c.parent_id))+')':''} <button class="s" onclick="renC(${c.id})">تعديل الاسم</button></p>`).join('');}
@@ -129,6 +151,9 @@ async function renC(id){const n=prompt('الاسم الجديد',cname(id));if(!
 async function drawU(){const{data}=await sb.from('profiles').select('*');
  $('ul').innerHTML=(data||[]).map(u=>`<p dir="ltr">${esc(u.email)} <select onchange="role('${u.id}',this.value)" style="width:auto">${['admin','editor','viewer'].map(r=>`<option ${r==u.role?'selected':''}>${r}</option>`).join('')}</select></p>`).join('');}
 async function role(id,r){const{error}=await sb.from('profiles').update({role:r}).eq('id',id);alert(error?error.message:'تم التحديث');}
+async function newU(){const e=$('ne').value.trim(),p=$('np').value;if(!e||p.length<6)return alert('اكتب البريد وكلمة مرور من 6 أحرف على الأقل');
+ const{error}=await sb.rpc('admin_create_user',{p_email:e,p_password:p,p_role:$('nr').value});
+ if(error)return alert('تعذر الإنشاء: '+error.message);$('ne').value=$('np').value='';alert('تم إنشاء المستخدم، يستطيع الدخول الآن');}
 
 async function pick(){const f=$('fl').files[0];if(!f)return;file=f.name;const cv=$('cv'),x=cv.getContext('2d');
  if(f.type=='application/pdf'){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -150,12 +175,17 @@ async function ocr(){if(!file)return alert('اختر صورة أولاً');$('pg
   let rank='';const nr=nz(rest);for(const k of RANKS)if(nr.startsWith(nz(k))){rank=k;rest=rest.slice(k.length).trim();break;}
   rows.push({c:dc,rank,name:rest,position:'',phone:ph,seq:String(++n),file,at:now});}
  if(!rows.length)return alert('لم يُستخرج نص واضح. جرّب صورة أوضح.');review();}
-function review(){V('rv');
+function review(){V('rv');const rt=$('rt');
  rt.innerHTML='<tr><th>#<th>المركز<th>الرتبة<th>الاسم<th>المنصب<th>الهاتف<th>';
- rows.forEach((r,i)=>{const pd=dig(r.phone),dup=R.find(x=>(pd&&dig(x.phone)==pd)||(nz(x.name)==nz(r.name)&&nz(cname(x.center_id))==nz(r.c)));
+ rows.forEach((r,i)=>{const pd=dig(r.phone),dup=R.find(x=>(pd&&x._d==pd)||(x._n==nz(r.name)&&x._c==nz(r.c)));
   const bad={c:!r.c,rank:!r.rank,name:r.name.split(' ').length<2,position:false,phone:!/^\d{10,11}$/.test(pd)};
   const tr=document.createElement('tr');tr.innerHTML=`<td>${r.seq||i+1}`+['c','rank','name','position','phone'].map(k=>`<td class="${bad[k]?'doubt':''}"><input ${k=='c'?'list="cl"':''} ${k=='phone'?'dir="ltr"':''} value="${esc(r[k])}" oninput="rows[${i}].${k}=this.value"></td>`).join('')+`<td><button class="s" onclick="rows.splice(${i},1);review()">حذف</button>${dup?'<br><small class="err">مشابه لـ: '+esc(dup.name)+'</small>':''}`;
   if(dup)tr.className='dup';rt.appendChild(tr);});}
+function dropDup(){const s=new Set(),n0=rows.length;
+ rows=rows.filter(r=>{const p=dig(r.phone),nn=nz(r.name),k='n'+nn+'|'+nz(r.c);
+  if((p&&R.some(x=>x._d==p))||R.some(x=>x._n==nn&&x._c==nz(r.c))||(p&&s.has('p'+p))||s.has(k))return false;
+  if(p)s.add('p'+p);s.add(k);return true;});
+ alert('أُزيل '+(n0-rows.length)+' صف مكرر');review();}
 async function save(){let ok=0;for(const r of rows){if(!r.name.trim())continue;
  const{error}=await sb.from('records').insert({center_id:await cid(r.c),rank:r.rank,name:r.name.trim(),position:r.position,phone:nd(r.phone),seq:r.seq,source_file:r.file,imported_at:r.at});
  if(error){alert(error.message);break;}ok++;}
@@ -167,12 +197,15 @@ function expCSV(){const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
  dl('phonebook.csv','\uFEFF'+[H.map(q).join(',')].concat(R.map(x=>[cname(x.center_id),x.rank,x.name,x.position,'="'+(x.phone||'')+'"',x.seq].map((v,i)=>i==4?v:q(v)).join(','))).join('\r\n'),'text/csv');}
 function parse(t){const o=[];let r=[],f='',qt=false;t=t.replace(/^\uFEFF/,'');
  for(let i=0;i<t.length;i++){const c=t[i];if(qt){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else qt=false}else f+=c}
- else if(c=='"')qt=true;else if(c==','){r.push(f);f=''}else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;r.push(f);o.push(r);r=[];f=''}else f+=c;}
+ else if(c=='"')qt=true;else if(c==','||c==';'){r.push(f);f=''}else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;r.push(f);o.push(r);r=[];f=''}else f+=c;}
  if(f||r.length){r.push(f);o.push(r);}return o;}
+async function xl(f){const w=XLSX.read(await f.arrayBuffer(),{type:'array'});
+ return XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1,raw:false,defval:''}).map(r=>r.map(v=>String(v).trim()));}
 async function impCSV(){const f=$('csvf').files[0];if(!f)return;file=f.name;const now=new Date().toISOString();
- rows=parse(await f.text()).slice(1).filter(r=>r[2]).map(r=>({c:r[0]||'',rank:r[1]||'',name:r[2],position:r[3]||'',phone:(r[4]||'').replace(/^="?|"$/g,''),seq:r[5]||'',file,at:now}));
- if(!rows.length)return alert('الملف فارغ أو بتنسيق غير صحيح');review();}
-function bak(){dl('backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({centers:C,records:R}),'application/json');}
+ const t=/\.xlsx$/i.test(f.name)?await xl(f):parse(await f.text());
+ rows=t.slice(1).filter(r=>r[2]).map(r=>({c:r[0]||'',rank:r[1]||'',name:r[2],position:r[3]||'',phone:(r[4]||'').replace(/^="?|"$/g,''),seq:r[5]||'',file,at:now}));
+ $('csvf').value='';if(!rows.length)return alert('الملف فارغ أو بتنسيق غير صحيح');review();}
+function bak(){dl('backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({centers:C,records:R.map(({_d,_n,_c,_s,...x})=>x)}),'application/json');}
 async function rest(){const f=$('bkf').files[0];if(!f||!confirm('ستُدمج النسخة مع البيانات الحالية. متابعة؟'))return;
  const d=JSON.parse(await f.text());let e=await sb.from('centers').upsert(d.centers);if(e.error)return alert(e.error.message);
  for(let i=0;i<d.records.length;i+=500){e=await sb.from('records').upsert(d.records.slice(i,i+500));if(e.error)return alert(e.error.message);}
