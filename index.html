@@ -84,9 +84,10 @@ async function login(){const{error}=await sb.auth.signInWithPassword({email:$('e
 if(error)$('le').textContent=error.message;}
 async function boot(s){
  if(!s){me=null;$('login').classList.remove('hide');$('app').classList.add('hide');$('who').textContent='';return;}
- const{data}=await sb.from('profiles').select('*').eq('id',s.user.id).single();
- me=data;$('login').classList.add('hide');
-if(!me){$('login').classList.remove('hide');$('le').textContent='هذا الحساب بلا صلاحيات، راجع المدير';await sb.auth.signOut();return;}
+ const{data,error}=await sb.from('profiles').select('*').eq('id',s.user.id).maybeSingle();
+ me=data;
+ if(!me){$('login').classList.remove('hide');$('le').textContent=error?('خطأ: '+error.message):'لا يوجد سجل صلاحيات لهذا الحساب';return;}
+ $('login').classList.add('hide');
  $('app').classList.remove('hide');$('who').textContent=s.user.email+' ('+{admin:'مدير',editor:'مدخل',viewer:'قارئ'}[me.role]+')';
  perms();await load();V('home');}
 async function load(){
